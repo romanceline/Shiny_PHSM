@@ -1,0 +1,12 @@
+name: test
+title: test
+username:
+account: worldhealthorg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3448851
+bundleId: 4073341
+url: https://worldhealthorg.shinyapps.io/Test/
+when: 1610130283.6346
+asMultiple: FALSE
+asStatic: FALSE

@@ -1,0 +1,12 @@
+name: PSHM_Explorer_SingleCountry
+title: PSHM_Explorer_SingleCountry
+username:
+account: worldhealthorg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3093277
+bundleId: 4117916
+url: https://worldhealthorg.shinyapps.io/PSHM_Explorer_SingleCountry/
+when: 1611077382.14304
+asMultiple: FALSE
+asStatic: FALSE
