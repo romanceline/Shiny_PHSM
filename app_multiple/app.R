@@ -22,23 +22,22 @@ library(forecast)
 library(imputeTS)
 
 
-
-StringencyIndex<-read.csv('input_to_update/StringencyIndex.csv')
-
-StringencyIndex<-StringencyIndex %>% rename(Schools=School,Businesses=Workplace,Movements=StayHome,Borders=Travels) %>%
-  mutate(Date=as.Date(Date)) %>% mutate(ADM0NAME=if_else(ADM0NAME=='Republic of Moldova','Republic Of Moldova',ADM0NAME),
-                                        ADM0NAME=if_else(ADM0NAME=='Bosnia and Herzegovina','Bosnia And Herzegovina',ADM0NAME)) %>%
-  arrange(ADM0NAME)
+# StringencyIndex<-read.csv('input_to_update/StringencyIndex.csv')
+# 
+# StringencyIndex<-StringencyIndex %>% rename(Schools=School,Businesses=Workplace,Movements=StayHome,Borders=Travels) %>%
+#   mutate(Date=as.Date(Date)) %>% mutate(ADM0NAME=if_else(ADM0NAME=='Republic of Moldova','Republic Of Moldova',ADM0NAME),
+#                                         ADM0NAME=if_else(ADM0NAME=='Bosnia and Herzegovina','Bosnia And Herzegovina',ADM0NAME)) %>%
+#   arrange(ADM0NAME)
 
 Legend<-read.csv('input_permanent/Legend.csv') %>% pivot_longer(cols=c(X.1:X.100)) %>% select(-c(X,name)) %>% 
   mutate(Country=if_else(Country=='Kosovo','Kosovo(1)',Country))
 
 MyPalette<-c("#008dc9ff", "#d86422ff", "#20313bff", "#d4aa7dff", "#197278ff","#686868", "#f2545bff", "#90a9b7ff", "#224870ff", "#66a182ff", "#885053ff")
 
-MainDataset<-read.csv('input_to_update/qry_covid_running_cases_country_date.CSV') %>%
-  mutate(ADM0NAME=str_to_title(ADM0NAME),
-         DateReport1=as.Date(parse_date_time(DateReport1,c("dmy", "ymd","mdy")))) %>%
-  mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME))
+# MainDataset<-read.csv('input_to_update/qry_covid_running_cases_country_date.CSV') %>%
+#   mutate(ADM0NAME=str_to_title(ADM0NAME),
+#          DateReport1=as.Date(parse_date_time(DateReport1,c("dmy", "ymd","mdy")))) %>%
+#   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME))
 
 
 PopulationDataset<-read.csv('input_permanent/ref_Country.csv') %>% select(ADM0NAME,UNPOP2019) %>% mutate(ADM0NAME=str_to_title(ADM0NAME))
@@ -232,13 +231,13 @@ maxDates<-function(ListCountries){
 }
 
 Top3_14DaysIncidence<-function() {
-  CurrentDate<-max(MainDataset$DateReport1)
+  CurrentDate<-max(GlobalDataset_$DateReport1)
 
   FourteenDaysIncidence_Dataset_ <- data.frame()
-  for (ctr in unique(MainDataset$ADM0NAME)){
+  for (ctr in unique(GlobalDataset_$ADM0NAME)){
     FourteenDaysIncidence_Dataset<-data.frame(nrow=1)
     FourteenDaysIncidence_Dataset$ADM0NAME[1]<-as.character(ctr)
-    FourteenDaysIncidence_Dataset$Cumul14Days[1]<-((MainDataset %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate))$TotalCases - (MainDataset %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate-14))$TotalCases)
+    FourteenDaysIncidence_Dataset$Cumul14Days[1]<-((GlobalDataset_ %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate))$TotalCases - (GlobalDataset_ %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate-14))$TotalCases)
     FourteenDaysIncidence_Dataset_<-bind_rows(FourteenDaysIncidence_Dataset,FourteenDaysIncidence_Dataset_)
   }
   FourteenDaysIncidence_Dataset_ <- FourteenDaysIncidence_Dataset_ %>% 
@@ -251,10 +250,10 @@ Top3_14DaysIncidence<-function() {
 
 
 Top3_14DaysIncidence<-function() {
-  CurrentDate<-max(MainDataset$DateReport1)
+  CurrentDate<-max(GlobalDataset_$DateReport1)
   FourteenDaysIncidence_Dataset_ <- data.frame()
-  for (ctr in unique(MainDataset$ADM0NAME)){
-    CountryDataset<-MainDataset %>% filter(ADM0NAME==ctr) %>% arrange(DateReport1)
+  for (ctr in unique(GlobalDataset_$ADM0NAME)){
+    CountryDataset<-GlobalDataset_ %>% filter(ADM0NAME==ctr) %>% arrange(DateReport1)
     CountryDataset<-CountryDataset %>% mutate(Cases14=TotalCases-lag(TotalCases,14))
     FourteenDaysIncidence_Dataset_<-bind_rows(CountryDataset,FourteenDaysIncidence_Dataset_)
   }
@@ -422,7 +421,7 @@ ui <- fluidPage(
   
   # Application title
   titlePanel(h4("Regional Overview: Daily Cases and Deaths over Severity of Public Health and Social Measures (PHSM)")),
-  div(id='note',paste0('Last updated on ',format(max(MainDataset$DateReport1),'%d/%m/%y'))),
+  div(id='note',paste0('Last updated on ',format(max(GlobalDataset_$DateReport1),'%d/%m/%y'))),
   #uiOutput("hover_info"),
   div(id='tab2',div(id='titleinfo','Please click on the points on the epicurves for more information'),
       div(id='info',htmlOutput("txt"))),
@@ -445,7 +444,7 @@ ui <- fluidPage(
 
   div(id='tab',fluidRow(
     column(3,
-           div(id="dd",selectInput("country","Select the countries",unique(StringencyIndex$ADM0NAME),multiple=TRUE,selected=Top3_14DaysIncidence())),
+           div(id="dd",selectInput("country","Select the countries",unique(GlobalDataset_$ADM0NAME),multiple=TRUE,selected=Top3_14DaysIncidence())),
            div(id="dd",selectInput("CasesOrDeaths","Cases or Deaths",c("Cases","Deaths"),multiple=FALSE)),
            div(id="dd",selectInput("scale","Select the scale to display the epicurve",c("Normal scale","Log scale"))),
            p("The chart displays by default smoothed curves built on reported values."),

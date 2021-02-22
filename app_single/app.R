@@ -44,34 +44,23 @@ library(grid)
 #../data
 MyPalette<-c("#008dc9ff", "#d86422ff", "#20313bff", "#d4aa7dff", "#197278ff","#686868", "#f2545bff", "#90a9b7ff", "#224870ff", "#66a182ff", "#885053ff")
 
-StringencyIndex<-read.csv("input_to_update/StringencyIndex.csv") %>% mutate(Date=as.Date(parse_date_time(Date,c("dmy", "ymd","mdy")))) %>% 
-  mutate(ADM0NAME=if_else(ADM0NAME=='Bosnia and Herzegovina','Bosnia And Herzegovina',ADM0NAME)) %>% 
-  arrange(ADM0NAME)
-
-# StringencyIndex<-read.csv(paste0(global_folder,"/input_to_update/StringencyIndex.csv")) %>% mutate(Date=as.Date(parse_date_time(Date,c("dmy", "ymd","mdy")))) %>% 
+# StringencyIndex<-read.csv("input_to_update/StringencyIndex.csv") %>% mutate(Date=as.Date(parse_date_time(Date,c("dmy", "ymd","mdy")))) %>% 
 #   mutate(ADM0NAME=if_else(ADM0NAME=='Bosnia and Herzegovina','Bosnia And Herzegovina',ADM0NAME)) %>% 
 #   arrange(ADM0NAME)
 
 
-
 LegendTimeLine<-read.csv('input_permanent/LegendTimeLine.csv')
   
-MainDataset<-read.csv("input_to_update/qry_covid_running_cases_country_date.CSV") %>%
-  mutate(ADM0NAME=str_to_title(ADM0NAME),
-         DateReport1=as.Date(parse_date_time(DateReport1,c("dmy", "ymd","mdy")))) %>%
-  left_join(StringencyIndex,by = c("ADM0NAME" = "ADM0NAME", "DateReport1" = "Date")) %>% 
-  mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME)) 
+# MainDataset<-read.csv("input_to_update/qry_covid_running_cases_country_date.CSV") %>%
+#   mutate(ADM0NAME=str_to_title(ADM0NAME),
+#          DateReport1=as.Date(parse_date_time(DateReport1,c("dmy", "ymd","mdy")))) %>%
+#   left_join(StringencyIndex,by = c("ADM0NAME" = "ADM0NAME", "DateReport1" = "Date")) %>% 
+#   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME)) 
 
-CurrentDate<-max(unique(MainDataset$Date))
+
 
 PopulationDataset<-read.csv('input_permanent/ref_Country.csv') %>% select(ADM0NAME,UNPOP2019) %>% mutate(ADM0NAME=str_to_title(ADM0NAME))
 
-
-
-minDate<-function(country){
-  Date <- min((MainDataset %>% filter(ADM0NAME==country))$DateReport1)
-  return(Date)
-}
 
 
 
@@ -79,6 +68,14 @@ GlobalDataset_<-read.csv('input_to_update/GlobalDataset.csv') %>% mutate(DateRep
   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME)) %>% 
   arrange(ADM0NAME) %>% 
   filter(!is.na(DateReport1))
+
+CurrentDate<-max(unique(GlobalDataset_$DateReport1))
+
+minDate<-function(country){
+  Date <- min((GlobalDataset_ %>% filter(ADM0NAME==country))$DateReport1)
+  return(Date)
+}
+
 
 Dataset_Cases_Normal<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,
                                                 RealValue=NewCases,SplineValue=Spline_3DaysAverageCases)
@@ -155,18 +152,18 @@ BigPlot<-function(ctry,CasesOrDeaths,par1,RealValues,StartDate,EndDate,Log){
 }
 
 Max_14DaysIncidence<-function() {
-  CurrentDate<-max(MainDataset$DateReport1)
+  CurrentDate<-max(GlobalDataset_$DateReport1)
   FourteenDaysIncidence_Dataset_ <- data.frame()
-  for (ctr in unique(MainDataset$ADM0NAME)){
+  for (ctr in unique(GlobalDataset_$ADM0NAME)){
     FourteenDaysIncidence_Dataset<-data.frame(nrow=1)
     FourteenDaysIncidence_Dataset$ADM0NAME[1]<-as.character(ctr)
-    FourteenDaysIncidence_Dataset$Cumul14Days[1]<-((MainDataset %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate))$TotalCases - (MainDataset %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate-14))$TotalCases)
+    FourteenDaysIncidence_Dataset$Cumul14Days[1]<-((GlobalDataset_ %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate))$TotalCases - (GlobalDataset_ %>% filter(ADM0NAME==ctr & DateReport1==CurrentDate-14))$TotalCases)
     FourteenDaysIncidence_Dataset_<-bind_rows(FourteenDaysIncidence_Dataset,FourteenDaysIncidence_Dataset_)
   }
   FourteenDaysIncidence_Dataset_ <- FourteenDaysIncidence_Dataset_ %>% 
     left_join(PopulationDataset,by='ADM0NAME') %>% 
     mutate(Incidence=Cumul14Days/UNPOP2019*100000) %>% 
-    arrange(desc(Incidence)) %>% filter(ADM0NAME %in% unique(StringencyIndex$ADM0NAME)) %>% top_n(1)
+    arrange(desc(Incidence)) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% top_n(1)
   
   return(FourteenDaysIncidence_Dataset_$ADM0NAME)
 }
@@ -311,7 +308,7 @@ ui <- fluidPage(
   
   
   titlePanel(h4("Country Analysis: Daily Cases and Deaths over Severity of Public Health and Social Measures (PHSM)")),
-  paste0('Last updated on ',format(max(MainDataset$DateReport1),'%d-%m-%Y')),
+  paste0('Last updated on ',format(max(GlobalDataset_$DateReport1),'%d-%m-%Y')),
   plotOutput("BeautifulPlot",height=400),
   
   br(),
