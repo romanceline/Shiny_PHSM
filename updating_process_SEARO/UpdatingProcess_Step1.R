@@ -1,5 +1,5 @@
 # Checks first if they are already installed and installs them if they're not
-PackagesToInstall<-c('xlsx','openxlsx',"hablar","ggsci",'BBmisc',"stringr","magick","gridExtra","lubridate","readxl","RColorBrewer","ggplot2","dplyr","rmarkdown","kableExtra","flextable","ggpubr","knitr","scales","tidyr","scales","xml2","rvest","qdapRegex",'cowplot') 
+PackagesToInstall<-c('openxlsx',"hablar","ggsci",'BBmisc',"stringr","magick","gridExtra","lubridate","readxl","RColorBrewer","ggplot2","dplyr","rmarkdown","kableExtra","flextable","ggpubr","knitr","scales","tidyr","scales","xml2","rvest","qdapRegex",'cowplot') 
 for (i in PackagesToInstall) {
   print(i)
   if (!i %in% installed.packages())
@@ -20,10 +20,10 @@ readSeverityDataset <- function(country) {
   colnames(dft) <- dft[1,] #Rewriting the column names
   colnames(dft)<-make.names(colnames(dft)) #Make sure column names are in acceptable format, no special character, no space,...
   dft<-dft[-c(1), ] #Removing useless row
-  Severity<-dft[,c("X1.4_IND","X4.1_IND","X4.2_IND","X4.3_IND","X4.5_IND","X5_IND","PHSM.SI","Date")] #Selects only fields we are interested in
+  Severity<-dft[,c("X1.4_IND","X4.1_IND","X4.2_IND","X4.3_IND","X4.5_IND","X4.6_IND","X5_IND","PHSM.SI","Date")] #Selects only fields we are interested in
   Severity<-as.data.frame(Severity) %>% mutate(Date=as.numeric(Date)) %>%
     mutate(Date=as.Date(Date,origin = "1899-12-30")) %>%
-    convert(num("X1.4_IND","X4.1_IND","X4.2_IND","X4.3_IND","X4.5_IND","X5_IND","PHSM.SI"))
+    convert(num("X1.4_IND","X4.1_IND","X4.2_IND","X4.3_IND","X4.5_IND","X4.6_IND","X5_IND","PHSM.SI"))
   #Retransforms the matrix in a dataframe where different types of data are allowed, converts characters into dates or numbers
   Severity$ADM0NAME<-country #Creates new field with country name as the final aim is to have a global dataset with all countries
   Severity<-Severity %>% select(
@@ -35,6 +35,7 @@ readSeverityDataset <- function(country) {
     Workplace=X4.2_IND,
     Gatherings=X4.3_IND,
     StayHome=X4.5_IND,
+    PublicTransport=X4.6_IND,
     Travels=X5_IND,
   ) #Gives understandable column names 
   return(Severity)
@@ -61,6 +62,7 @@ ExistingKeyDates_Businesses<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),s
 ExistingKeyDates_Borders<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Borders') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 ExistingKeyDates_Movements<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Movements') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 ExistingKeyDates_Gatherings<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Gatherings') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
+ExistingKeyDates_PublicTransport<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Public Transport') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 
 StringencyCountryKeyDates<-function(ctr,Measure){
   
@@ -92,6 +94,10 @@ StringencyCountryKeyDates<-function(ctr,Measure){
   
   if (Measure=='Gatherings'){
     Dataset<-Dataset %>% select(Date,ADM0NAME,Index=Gatherings)
+  }
+  
+  if (Measure=='PublicTransport'){
+    Dataset<-Dataset %>% select(Date,ADM0NAME,Index=PublicTransport)
   }
   
   Dataset<-Dataset %>% mutate(Change=if_else(lag(Index,1)==Index,'No','Yes'))
@@ -143,6 +149,12 @@ for (ctr in unique(StringencyIndex$ADM0NAME)){
   Dataset_Movements_<-rbind(Dataset_Movements,Dataset_Movements_)
 }
 
+Dataset_PublicTransport_<-data.frame()
+for (ctr in unique(StringencyIndex$ADM0NAME)){
+  Dataset_PublicTransport<-StringencyCountryKeyDates(ctr,'PublicTransport')
+  Dataset_PublicTransport_<-rbind(Dataset_PublicTransport,Dataset_PublicTransport_)
+}
+
 Dataset_Movements_ <- Dataset_Movements_ %>% mutate(Date=as.Date(Date))
 Dataset_All_ <- Dataset_All_ %>% mutate(Date=as.Date(Date))
 Dataset_Businesses_ <- Dataset_Businesses_ %>% mutate(Date=as.Date(Date))
@@ -151,6 +163,7 @@ Dataset_Movements_ <- Dataset_Movements_ %>% mutate(Date=as.Date(Date))
 Dataset_Gatherings_ <- Dataset_Gatherings_ %>% mutate(Date=as.Date(Date))
 Dataset_Schools_ <- Dataset_Schools_ %>% mutate(Date=as.Date(Date))
 Dataset_Masks_ <- Dataset_Masks_ %>% mutate(Date=as.Date(Date))
+Dataset_PublicTransport_ <- Dataset_PublicTransport_ %>% mutate(Date=as.Date(Date))
 
 
 Dataset_Movements<-Dataset_Movements_ %>% 
@@ -174,6 +187,9 @@ Dataset_Businesses<-Dataset_Businesses_ %>%
 Dataset_Gatherings<-Dataset_Gatherings_ %>% 
   left_join(ExistingKeyDates_Gatherings %>% select(Date,ADM0NAME,Narrative_Gatherings),by=c('Date','ADM0NAME')) %>% 
   filter(Change=='Yes') %>% select(-Change)
+Dataset_PublicTransport<-Dataset_PublicTransport_ %>% 
+  left_join(ExistingKeyDates_PublicTransport %>% select(Date,ADM0NAME,Narrative_PublicTransport),by=c('Date','ADM0NAME')) %>% 
+  filter(Change=='Yes') %>% select(-Change)
 
 list_of_datasets <- list("Severity Index"=Dataset_All,
                          "Masks"=Dataset_Masks,
@@ -181,7 +197,11 @@ list_of_datasets <- list("Severity Index"=Dataset_All,
                          "Businesses"=Dataset_Businesses, 
                          "Gatherings"=Dataset_Gatherings,
                          "Movements"=Dataset_Movements,
-                         "Borders"=Dataset_Borders)
+                         "Borders"=Dataset_Borders,
+                         "PublicTransport"=Dataset_PublicTransport)
 
-write.xlsx(list_of_datasets, file = paste0(folderOutput,"/KeyDates.",CurrentDate,".xlsx"))
+write.xlsx(list_of_datasets, 
+           file = paste0(folderOutput,"/KeyDates.",CurrentDate,".xlsx"))
+
+
 
