@@ -1,0 +1,12 @@
+name: PSHM_Explorer_MultiCountries
+title: PSHM_Explorer_MultiCountries
+username:
+account: worldhealthorg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3092890
+bundleId: 4271822
+url: https://worldhealthorg.shinyapps.io/PSHM_Explorer_MultiCountries/
+when: 1614273634.55355
+asMultiple: FALSE
+asStatic: FALSE

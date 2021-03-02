@@ -62,7 +62,7 @@ ExistingKeyDates_Businesses<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),s
 ExistingKeyDates_Borders<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Borders') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 ExistingKeyDates_Movements<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Movements') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 ExistingKeyDates_Gatherings<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Gatherings') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
-ExistingKeyDates_PublicTransport<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='Public Transport') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
+ExistingKeyDates_PublicTransport<-read_excel(paste0(folderInput_2,"/KeyDates.xlsx"),sheet='PublicTransport') %>% mutate(Date=as.Date(Date),ADM0NAME=as.character(ADM0NAME))
 
 StringencyCountryKeyDates<-function(ctr,Measure){
   
