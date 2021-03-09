@@ -40,7 +40,8 @@ MyPalette<-c("#008dc9ff", "#d86422ff", "#20313bff", "#d4aa7dff", "#197278ff","#6
 #   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME))
 
 
-PopulationDataset<-read.csv('input_permanent/ref_Country.csv') %>% select(ADM0NAME,UNPOP2019) %>% mutate(ADM0NAME=str_to_title(ADM0NAME))
+#PopulationDataset<-read.csv('input_permanent/ref_Country.csv') %>% select(ADM0NAME,UNPOP2019) %>% mutate(ADM0NAME=str_to_title(ADM0NAME))
+PopulationDataset<-GetPopulation() %>% select(ADM0NAME=ADM0_NAME,Population)
 
 GlobalDataset_<-read.csv('input_to_update/GlobalDataset.csv') %>% mutate(DateReport1=as.Date(DateReport1)) %>% 
   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME)) 
@@ -242,7 +243,7 @@ Top3_14DaysIncidence<-function() {
   }
   FourteenDaysIncidence_Dataset_ <- FourteenDaysIncidence_Dataset_ %>% 
     left_join(PopulationDataset,by='ADM0NAME') %>% 
-    mutate(Incidence=Cumul14Days/UNPOP2019*100000) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% 
+    mutate(Incidence=Cumul14Days/Population*100000) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% 
     arrange(desc(Incidence)) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% top_n(3)
   
   return(FourteenDaysIncidence_Dataset_$ADM0NAME)
@@ -260,7 +261,7 @@ Top3_14DaysIncidence<-function() {
   FourteenDaysIncidence_Dataset_ <- FourteenDaysIncidence_Dataset_ %>% 
     filter(DateReport1==CurrentDate) %>% 
     left_join(PopulationDataset,by='ADM0NAME') %>% 
-    mutate(Incidence=Cases14/UNPOP2019*100000) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% 
+    mutate(Incidence=Cases14/Population*100000) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% 
     arrange(desc(Incidence)) %>% filter(ADM0NAME %in% unique(GlobalDataset_$ADM0NAME)) %>% top_n(3)
   
   return(FourteenDaysIncidence_Dataset_$ADM0NAME)
