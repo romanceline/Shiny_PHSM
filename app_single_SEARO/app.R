@@ -323,7 +323,7 @@ ui <- fluidPage(
   div(id='tab',fluidRow(
         column(4,
            div(id="dd",selectInput("country","Select the country",unique(GlobalDataset_$ADM0NAME),multiple=FALSE,selected=Max_14DaysIncidence())),
-           div(id="dd",selectInput("Measure","Select the PHSM of interest",c("All measures together",'Masks',"Schools","Movements","Gatherings","Businesses","International Travel"),multiple=FALSE)),
+           div(id="dd",selectInput("Measure","Select the PHSM of interest",c("All measures together",'Masks',"Schools","Movements","Gatherings","Businesses","International Travel",'Public Transports'),multiple=FALSE)),
            #div(id="dd",dateInput("cutDate","Select the maximum date:",value=max(MainDataset$DateReport1))),
            div(id="dd",uiOutput("slider"))),
         
@@ -361,7 +361,8 @@ server <- function(input, output) {
               input$Measure=='Gatherings' ~ 'Gatherings',
               input$Measure=='Movements' ~ 'Movements',
               input$Measure=='International Travel' ~ 'Borders',
-              input$Measure=='All measures together' ~ 'All measures together')
+              input$Measure=='All measures together' ~ 'All measures together',
+              input$Measure=='Public Transports' ~ 'PublicTransport')
   })
   
   output$slider <- renderUI({

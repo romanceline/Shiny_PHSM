@@ -297,7 +297,7 @@ PlotSeverity<-function(ListCountries,Log,CasesOrDeaths,country_hovered,Date_hove
                                   Measure=='Borders' ~ 'Int. Travel Measures \nSeverity',
                                   Measure=='Businesses' ~ 'Businesses Measures \nSeverity',
                                   Measure=='Masks' ~ 'Masks Measures \nSeverity',
-                 Measure=='PublicTransport' ~ 'Public Transports \nSeverity',
+                                  Measure=='PublicTransport' ~ 'Public Transports \nSeverity',
                                   Measure=='All' ~ 'PHSM Severity \n')
  if (TimeScale=='Absolute'){
     plot_timeline<-ggplot(Dataset,aes(x=X_axis,y=MaxValue,fill=ADM0NAME))+
