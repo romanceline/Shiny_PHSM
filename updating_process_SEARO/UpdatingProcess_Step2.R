@@ -61,7 +61,7 @@ KeyDates_PublicTransport<-read_excel(paste0(folderInput_1,'/KeyDates.xlsx'),shee
 
 
 MainDataset_<-read.csv(paste0(folderInput_1,"/qry_covid_running_cases_country_date.CSV")) %>% 
-  mutate(ADM0NAME=str_to_title(ADM0NAME),
+  mutate(#ADM0NAME=str_to_title(ADM0NAME),
          DateReport1=as.Date(parse_date_time(DateReport1,c("dmy", "ymd","mdy")))) %>% 
   mutate(ADM0NAME=if_else(ADM0NAME=='Kosovo','Kosovo(1)',ADM0NAME)) %>% 
   mutate(NewCases=as.double(NewCases),
@@ -129,41 +129,55 @@ DatasetWithSplineValues<-function(ctr){
   CountryDataset<-DatasetToSmooth(ctr)
   CountryDataset_Cases<-DatasetToSmooth(ctr) %>% filter(!is.na(ThreeDaysAverage_Cases)) %>% select(DateReport1,ThreeDaysAverage_Cases)
   CountryDataset_Deaths<-DatasetToSmooth(ctr) %>% filter(!is.na(ThreeDaysAverage_Deaths)) %>% select(DateReport1,ThreeDaysAverage_Deaths)
-  CountryDataset_logCases<-DatasetToSmooth(ctr) %>% filter(!is.na(log10_MovingAverage_Cases)) %>% 
-    select(DateReport1,log10_MovingAverage_Cases) %>% filter(log10_MovingAverage_Cases!=-Inf)
-  CountryDataset_logDeaths<-DatasetToSmooth(ctr) %>% filter(!is.na(log10_MovingAverage_Deaths)) %>% 
-    select(DateReport1,log10_MovingAverage_Deaths) %>% filter(log10_MovingAverage_Deaths!=-Inf)
+
+  
+  # if (sum(CountryDataset_Cases$ThreeDaysAverage_Cases)!=0){
+  #   CountryDataset_logCases<-DatasetToSmooth(ctr) %>% filter(!is.na(log10_MovingAverage_Cases)) %>% 
+  #     select(DateReport1,log10_MovingAverage_Cases) 
+  #   CountryDataset_logCases$log10_MovingAverage_Cases[which(!is.finite(CountryDataset_logCases$log10_MovingAverage_Cases))]<-0}
+  # 
+  # if (sum(CountryDataset_Cases$ThreeDaysAverage_Cases)==0){
+  #   CountryDataset_logCases<-CountryDataset_Cases %>% select(DateReport1) %>% mutate(log10_MovingAverage_Cases=0)}
+  # 
+  # if (sum(CountryDataset_Deaths$ThreeDaysAverage_Deaths)!=0){
+  #   CountryDataset_logDeaths<-DatasetToSmooth(ctr) %>% filter(!is.na(log10_MovingAverage_Deaths)) %>% 
+  #   select(DateReport1,log10_MovingAverage_Deaths) 
+  #   CountryDataset_logDeaths$log10_MovingAverage_Deaths[which(!is.finite(CountryDataset_logDeaths$log10_MovingAverage_Deaths))]<-0}
+  # 
+  # if (sum(CountryDataset_Deaths$ThreeDaysAverage_Deaths)==0){
+  #   CountryDataset_logDeaths<-CountryDataset_Deaths %>% select(DateReport1) %>% mutate(log10_MovingAverage_Deaths=0)}
+  
   Spline_3DaysAverageCases<-smooth.spline(x=CountryDataset_Cases$DateReport1,y=CountryDataset_Cases$ThreeDaysAverage_Cases,spar=0.5)
   Spline_3DaysAverageDeaths<-smooth.spline(x=CountryDataset_Deaths$DateReport1,y=CountryDataset_Deaths$ThreeDaysAverage_Deaths,spar=0.5)
-  Spline_3DaysAverage_LogCases<-smooth.spline(x=CountryDataset_logCases$DateReport1,y=CountryDataset_logCases$log10_MovingAverage_Cases,spar=0.5)
-  Spline_3DaysAverage_LogDeaths<-smooth.spline(x=CountryDataset_logDeaths$DateReport1,y=CountryDataset_logDeaths$log10_MovingAverage_Deaths,spar=0.5)
+  # Spline_3DaysAverage_LogCases<-smooth.spline(x=CountryDataset_logCases$DateReport1,y=CountryDataset_logCases$log10_MovingAverage_Cases,spar=0.5)
+  # Spline_3DaysAverage_LogDeaths<-smooth.spline(x=CountryDataset_logDeaths$DateReport1,y=CountryDataset_logDeaths$log10_MovingAverage_Deaths,spar=0.5)
   ValuesSpline_3DaysAverageCases<-data.frame(SplineValue_3DaysAverageCases=predict(Spline_3DaysAverageCases,deriv=0))
   ValuesSpline_3DaysAverageDeaths<-data.frame(SplineValue_3DaysAverageDeaths=predict(Spline_3DaysAverageDeaths,deriv=0))
-  ValuesSpline_3DaysAverage_LogCases<-data.frame(SplineValue_3DaysAverage_LogCases=predict(Spline_3DaysAverage_LogCases,deriv=0))
-  ValuesSpline_3DaysAverage_LogDeaths<-data.frame(SplineValue_3DaysAverage_LogDeaths=predict(Spline_3DaysAverage_LogDeaths,deriv=0))
+  # ValuesSpline_3DaysAverage_LogCases<-data.frame(SplineValue_3DaysAverage_LogCases=predict(Spline_3DaysAverage_LogCases,deriv=0))
+  # ValuesSpline_3DaysAverage_LogDeaths<-data.frame(SplineValue_3DaysAverage_LogDeaths=predict(Spline_3DaysAverage_LogDeaths,deriv=0))
   CountryDataset_Cases<-data.frame(CountryDataset_Cases,ValuesSpline_3DaysAverageCases) %>% 
     select(DateReport1,"Spline_3DaysAverageCases"="SplineValue_3DaysAverageCases.y")
   CountryDataset_Deaths<-data.frame(CountryDataset_Deaths,ValuesSpline_3DaysAverageDeaths) %>% 
     select(DateReport1,"Spline_3DaysAverageDeaths"="SplineValue_3DaysAverageDeaths.y")
-  CountryDataset_logCases<-data.frame(CountryDataset_logCases,ValuesSpline_3DaysAverage_LogCases) %>% 
-    select(DateReport1,"Spline_3DaysAverage_logCases"="SplineValue_3DaysAverage_LogCases.y")
-  CountryDataset_logDeaths<-data.frame(CountryDataset_logDeaths,ValuesSpline_3DaysAverage_LogDeaths) %>% 
-    select(DateReport1,"Spline_3DaysAverage_logDeaths"="SplineValue_3DaysAverage_LogDeaths.y")
+  # CountryDataset_logCases<-data.frame(CountryDataset_logCases,ValuesSpline_3DaysAverage_LogCases) %>% 
+  #   select(DateReport1,"Spline_3DaysAverage_logCases"="SplineValue_3DaysAverage_LogCases.y")
+  # CountryDataset_logDeaths<-data.frame(CountryDataset_logDeaths,ValuesSpline_3DaysAverage_LogDeaths) %>% 
+  #   select(DateReport1,"Spline_3DaysAverage_logDeaths"="SplineValue_3DaysAverage_LogDeaths.y")
   CountryDataset_<-CountryDataset %>% 
     left_join(CountryDataset_Cases,by='DateReport1') %>% 
-    left_join(CountryDataset_Deaths,by='DateReport1') %>% 
-    left_join(CountryDataset_logCases,by='DateReport1') %>% 
-    left_join(CountryDataset_logDeaths,by='DateReport1') 
+    left_join(CountryDataset_Deaths,by='DateReport1') #%>% 
+    # left_join(CountryDataset_logCases,by='DateReport1') %>% 
+    # left_join(CountryDataset_logDeaths,by='DateReport1') 
   
-  x <- zoo(CountryDataset_$Spline_3DaysAverage_logCases,CountryDataset_$DateReport1)
-  x <- na_interpolation(x, option = "linear") %>% fortify.zoo
+  # x <- zoo(CountryDataset_$Spline_3DaysAverage_logCases,CountryDataset_$DateReport1)
+  # x <- na_interpolation(x, option = "linear") %>% fortify.zoo
+  # 
+  # y <- zoo(CountryDataset_$Spline_3DaysAverage_logDeaths,CountryDataset_$DateReport1)
+  # y <- na_interpolation(y, option = "linear") %>% fortify.zoo
   
-  y <- zoo(CountryDataset_$Spline_3DaysAverage_logDeaths,CountryDataset_$DateReport1)
-  y <- na_interpolation(y, option = "linear") %>% fortify.zoo
-  
-  CountryDataset_<-CountryDataset_ %>% left_join(x,by=c('DateReport1'='Index')) %>% rename(Spline_3DaysAverage_logCases_='.')
-  CountryDataset_<-CountryDataset_ %>% left_join(y,by=c('DateReport1'='Index')) %>% rename(Spline_3DaysAverage_logDeaths_='.')
-  
+  # CountryDataset_<-CountryDataset_ %>% left_join(x,by=c('DateReport1'='Index')) %>% rename(Spline_3DaysAverage_logCases_='.')
+  # CountryDataset_<-CountryDataset_ %>% left_join(y,by=c('DateReport1'='Index')) %>% rename(Spline_3DaysAverage_logDeaths_='.')
+  # 
   
   return(CountryDataset_)
 }
@@ -173,7 +187,7 @@ CheckAtLeast4Values<-function(){
   ListCountriesOkToSpline<-data.frame()
   for (ctr in unique(MainDataset$ADM0NAME)){
     CountryDataset<-MainDataset %>% filter(ADM0NAME==ctr)
-    CountryDataset<-CountryDataset %>% filter(NewDeaths!=0)
+    #CountryDataset<-CountryDataset %>% filter(NewDeaths!=0)
     if ((nrow(CountryDataset)) > 3){
       ListCountriesOkToSpline<-c(ctr,ListCountriesOkToSpline)}
   }

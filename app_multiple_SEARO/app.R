@@ -56,16 +56,16 @@ Dataset_Deaths_Normal<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalInde
                                                  Days_All,Days_Schools,Days_Masks,Days_Gatherings,Days_Movements,Days_Borders,Days_Businesses,Days_PublicTransport,
                                                  RealValue=NewDeaths,SplineValue=Spline_3DaysAverageDeaths)
 
-Dataset_Cases_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
-                                             Narrative_All,Narrative_Masks,Narrative_Schools,Narrative_Businesses,Narrative_Borders,Narrative_Gatherings,Narrative_Movements,Narrative_PublicTransport,
-                                             Days_All,Days_Schools,Days_Masks,Days_Gatherings,Days_Movements,Days_Borders,Days_Businesses,Days_PublicTransport,
-                                             RealValue=log_cases,SplineValue=Spline_3DaysAverage_logCases_)
-
-Dataset_Deaths_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
-                                             Narrative_All,Narrative_Masks,Narrative_Schools,Narrative_Businesses,Narrative_Borders,Narrative_Gatherings,Narrative_Movements,Narrative_PublicTransport,
-                                             Days_All,Days_Schools,Days_Masks,Days_Gatherings,Days_Movements,Days_Borders,Days_Businesses,Days_PublicTransport,
-                                             RealValue=log_deaths,SplineValue=Spline_3DaysAverage_logDeaths_)
-  
+# Dataset_Cases_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
+#                                              Narrative_All,Narrative_Masks,Narrative_Schools,Narrative_Businesses,Narrative_Borders,Narrative_Gatherings,Narrative_Movements,Narrative_PublicTransport,
+#                                              Days_All,Days_Schools,Days_Masks,Days_Gatherings,Days_Movements,Days_Borders,Days_Businesses,Days_PublicTransport,
+#                                              RealValue=log_cases,SplineValue=Spline_3DaysAverage_logCases_)
+# 
+# Dataset_Deaths_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
+#                                              Narrative_All,Narrative_Masks,Narrative_Schools,Narrative_Businesses,Narrative_Borders,Narrative_Gatherings,Narrative_Movements,Narrative_PublicTransport,
+#                                              Days_All,Days_Schools,Days_Masks,Days_Gatherings,Days_Movements,Days_Borders,Days_Businesses,Days_PublicTransport,
+#                                              RealValue=log_deaths,SplineValue=Spline_3DaysAverage_logDeaths_)
+#   
 
 Dataset_ToPlot<-function(ListCountries,Log,CasesOrDeaths,StartDate,EndDate,Measure,TimeScale){
 
@@ -515,7 +515,7 @@ server <- function(input, output,session) {
   })
   
   output$slider <- renderUI({
-    req(StartDate(),EndDate(),Log())
+    req(StartDate(),EndDate(),'False')
     dateRangeInput("date_range","Date Range",start=StartDate(), end=EndDate())
   })
   
@@ -533,8 +533,8 @@ server <- function(input, output,session) {
   
   
   Dataset_TEST<-reactive({
-    req(input$country,Log(),input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
-    Dataset_ToPlot(input$country,Log(),input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
+    req(input$country,'False',input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
+    Dataset_ToPlot(input$country,'False',input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
   })
 
 
@@ -560,8 +560,8 @@ server <- function(input, output,session) {
   # })
     
   KeyValues<-reactive({
-    req(input$country,Log(),input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
-    Dataset<-Dataset_ToPlot(input$country,Log(),input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
+    req(input$country,'False',input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
+    Dataset<-Dataset_ToPlot(input$country,'False',input$CasesOrDeaths,input$date_range[1],input$date_range[2],Measure(),TimeScale())
     Dataset %>% filter(!is.na(Narrative))
   })
   
@@ -570,7 +570,7 @@ server <- function(input, output,session) {
   output$Epiplot<-renderPlot({
     shiny::validate(
       need(length(input$date_range[1])>0, 'Loading...'))
-    plotEpi(input$country,input$date_range[1],input$date_range[2],RealValues(),Log(),input$CasesOrDeaths,TimeScale(),Measure(),activeCountry(),activeDate())+
+    plotEpi(input$country,input$date_range[1],input$date_range[2],RealValues(),'False',input$CasesOrDeaths,TimeScale(),Measure(),activeCountry(),activeDate())+
       theme(legend.position="none")
   })
   
@@ -579,9 +579,9 @@ server <- function(input, output,session) {
   
   output$SeverityPlot<-renderPlot({
     shiny::validate(
-      need(!is.null(input$country) & !is.null(Log()) & !is.null(input$CasesOrDeaths) & !is.null(input$date_range[1]) &
+      need(!is.null(input$country) & !is.null('False') & !is.null(input$CasesOrDeaths) & !is.null(input$date_range[1]) &
              !is.null(input$date_range[2]) & !is.null(Measure()) & !is.null(TimeScale()), ''))
-    PlotSeverity(input$country,Log(),input$CasesOrDeaths,activeCountry(),activeDate(),input$date_range[1],input$date_range[2],Measure(),TimeScale(),RealValues())
+    PlotSeverity(input$country,'False',input$CasesOrDeaths,activeCountry(),activeDate(),input$date_range[1],input$date_range[2],Measure(),TimeScale(),RealValues())
     })
 
   
@@ -591,8 +591,8 @@ server <- function(input, output,session) {
 
 
   output$LegendEpicurve<-renderPlot({
-    req(input$country,input$date_range[1],input$date_range[2],RealValues(),Log(),input$CasesOrDeaths,TimeScale(),Measure())
-    plot<-plotEpi(input$country,input$date_range[1],input$date_range[2],RealValues(),Log(),input$CasesOrDeaths,TimeScale(),Measure(),activeCountry(),activeDate())
+    req(input$country,input$date_range[1],input$date_range[2],RealValues(),'False',input$CasesOrDeaths,TimeScale(),Measure())
+    plot<-plotEpi(input$country,input$date_range[1],input$date_range[2],RealValues(),'False',input$CasesOrDeaths,TimeScale(),Measure(),activeCountry(),activeDate())
     plot_grid(get_legend(plot),align='v',axis='t')
   })
 

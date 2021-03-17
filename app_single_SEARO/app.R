@@ -84,11 +84,11 @@ Dataset_Cases_Normal<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex
 Dataset_Deaths_Normal<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
                                                  RealValue=NewDeaths,SplineValue=Spline_3DaysAverageDeaths)
 
-Dataset_Cases_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
-                                             RealValue=log_cases,SplineValue=Spline_3DaysAverage_logCases_)
+#Dataset_Cases_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
+                                             #RealValue=log_cases,SplineValue=Spline_3DaysAverage_logCases_)
 
-Dataset_Deaths_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
-                                              RealValue=log_deaths,SplineValue=Spline_3DaysAverage_logDeaths_)
+#Dataset_Deaths_Log<-GlobalDataset_ %>% select(ADM0NAME,DateReport1,GlobalIndex,Masks,Schools,Businesses,Gatherings,Movements,Borders,PublicTransport,
+                                              #RealValue=log_deaths,SplineValue=Spline_3DaysAverage_logDeaths_)
   
 Dataset_ToPlot<-function(ctr,Log,CasesOrDeaths,StartDate,EndDate){
   
@@ -329,7 +329,7 @@ ui <- fluidPage(
         
         column(4,
            div(id="dd",selectInput("CasesOrDeaths","Cases or Deaths",c("Cases","Deaths"),multiple=FALSE)),
-           div(id="dd",selectInput("scale","Select the scale to display the chart",c("Normal scale","Log scale"))),
+           #div(id="dd",selectInput("scale","Select the scale to display the chart",c("Normal scale","Log scale"))),
            p("The chart displays by default smoothed curves built on reported values."),
            div(id="dd",checkboxInput("RealVal","Display reported (unsmoothed) values as well",FALSE))),
         
@@ -381,9 +381,9 @@ server <- function(input, output) {
     shiny::validate(
       need(length(input$date_range[1])>0, 'Loading...'))
     
-    plot<-BigPlot(input$country,input$CasesOrDeaths,0.5,RealValues(),input$date_range[1],input$date_range[2],Log())
+    plot<-BigPlot(input$country,input$CasesOrDeaths,0.5,RealValues(),input$date_range[1],input$date_range[2],'False')
 
-    plot_timeline<-PlotTimeLine(input$country,input$CasesOrDeaths,input$date_range[1],input$date_range[2],Log(),Measure())
+    plot_timeline<-PlotTimeLine(input$country,input$CasesOrDeaths,input$date_range[1],input$date_range[2],'False',Measure())
     
     plots_option2<-plot_grid(plot+theme(legend.position='none'),plot_timeline+theme(legend.position='none'),align='v',axis='lr',nrow=2,rel_heights=dimensions())
     #legends_option2<-plot_grid(get_legend(plot_timeline))
