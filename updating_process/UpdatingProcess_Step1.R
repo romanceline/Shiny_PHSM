@@ -1,5 +1,5 @@
 # Checks first if they are already installed and installs them if they're not
-PackagesToInstall<-c('openxlsx',"hablar","ggsci",'BBmisc',"stringr","magick","gridExtra","lubridate","readxl","RColorBrewer","ggplot2","dplyr","rmarkdown","kableExtra","flextable","ggpubr","knitr","scales","tidyr","scales","xml2","rvest","qdapRegex",'cowplot') 
+PackagesToInstall<-c('WHOCountryNames','openxlsx',"hablar","ggsci",'BBmisc',"stringr","magick","gridExtra","lubridate","readxl","RColorBrewer","ggplot2","dplyr","rmarkdown","kableExtra","flextable","ggpubr","knitr","scales","tidyr","scales","xml2","rvest","qdapRegex",'cowplot') 
 for (i in PackagesToInstall) {
   print(i)
   if (!i %in% installed.packages())
@@ -50,6 +50,7 @@ for (country in ListCountries_Index){
   StringencyIndex<-bind_rows(StringencyIndex,StringencyIndex_)
 }
 
+StringencyIndex<-WHOCountryNames(StringencyIndex,ADM0NAME)
 
 write.csv(StringencyIndex,paste0(folderOutput,'/StringencyIndex.csv'),row.names=FALSE)
 CurrentDate<-max(StringencyIndex$Date,na.rm=TRUE)
@@ -184,4 +185,5 @@ list_of_datasets <- list("Severity Index"=Dataset_All,
                          "Borders"=Dataset_Borders)
 
 write.xlsx(list_of_datasets, file = paste0(folderOutput,"/KeyDates.",CurrentDate,".xlsx"))
+
 
