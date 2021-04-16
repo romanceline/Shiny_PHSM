@@ -20,6 +20,8 @@ library(ggiraph)
 library(zoo)
 library(forecast)
 library(imputeTS)
+library(GetPopulation)
+library(WHOCountryNames)
 
 
 # StringencyIndex<-read.csv('input_to_update/StringencyIndex.csv')
@@ -396,6 +398,7 @@ ui <- fluidPage(
   useShinyjs(),
   
   tags$head(
+    tags$head(includeHTML(("google-analytics.html"))),
     tags$style(css),
     tags$style(HTML("
       p {font-size:8pt},
