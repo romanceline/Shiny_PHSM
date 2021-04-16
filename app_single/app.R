@@ -283,6 +283,7 @@ css <-
 ui <- fluidPage(
   
   tags$head(
+    tags$head(includeHTML(("google-analytics.html"))),
     tags$style(css),
     tags$style(HTML("
       p {font-size:8pt},
