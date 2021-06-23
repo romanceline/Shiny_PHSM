@@ -448,7 +448,7 @@ ui <- fluidPage(
 
   div(id='tab',fluidRow(
     column(3,
-           div(id="dd",selectInput("country","Select the countries",unique(GlobalDataset_$ADM0NAME),multiple=TRUE,selected=Top3_14DaysIncidence())),
+           div(id="dd",selectInput("country","Select the countries",sort(unique(GlobalDataset_$ADM0NAME)),multiple=TRUE,selected=Top3_14DaysIncidence())),
            div(id="dd",selectInput("CasesOrDeaths","Cases or Deaths",c("Cases","Deaths"),multiple=FALSE)),
            div(id="dd",selectInput("scale","Select the scale to display the epicurve",c("Normal scale","Log scale"))),
            p("The chart displays by default smoothed curves built on reported values."),
