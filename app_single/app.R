@@ -338,7 +338,7 @@ ui <- fluidPage(
 
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
  
   RealValues <- reactive({
     if(input$RealVal==TRUE)
@@ -392,6 +392,13 @@ server <- function(input, output) {
   
   output$Legend<-renderPlot({
     TrickLegend
+  })
+  
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if (!is.null(query[['country']])) {
+      updateTextInput(session, "country", value = query[['country']])
+    }
   })
     
 }
